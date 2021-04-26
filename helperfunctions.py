@@ -74,59 +74,41 @@ class BBconversion:
 
 
 
-# ra = [3., 3., 5., 5.]
-# rb = [1., 1., 4., 3.5]
-# intersection of these should be 0.5
-
-
-### PYIMAGE SEARCH IOU - used to debug code when saving wasn't working
-def compute_iou(boxA, boxB):
-    	# determine the (x, y)-coordinates of the intersection rectangle
-	xA = max(boxA[0], boxB[0])
-	yA = max(boxA[1], boxB[1])
-	xB = min(boxA[2], boxB[2])
-	yB = min(boxA[3], boxB[3])
-	# compute the area of intersection rectangle
-	interArea = max(0, xB - xA + 1) * max(0, yB - yA + 1)
-	# compute the area of both the prediction and ground-truth
-	# rectangles
-	boxAArea = (boxA[2] - boxA[0] + 1) * (boxA[3] - boxA[1] + 1)
-	boxBArea = (boxB[2] - boxB[0] + 1) * (boxB[3] - boxB[1] + 1)
-	# compute the intersection over union by taking the intersection
-	# area and dividing it by the sum of prediction + ground-truth
-	# areas - the intersection area
-	iou = interArea / float(boxAArea + boxBArea - interArea)
-	# return the intersection over union value
-	return iou
+ra = [0., 0., 7., 7.] # ground truth
+rb = [4., 4., 11., 11.] # proposed region
+# union of these should be 0.25
 
 
 ### MY IOU
 def calculate_IOU(coordinatesA, coordinatesB):
-    """Calculate intersection over union with inputs of ground truth and predicted bb provided in any order. Assumes both coordinates inputs are in xyxy list format."""
+    """Ground truth is coordinates A, proposed region is coordinates B. Calculate intersection over union with inputs of ground truth and predicted bb provided in any order. Assumes both coordinates inputs are in x1y1x2y2 list format."""
     # Use largest and smallest (max and min) to get intersection coord
-    greaterX = max(coordinatesA[0], coordinatesB[0])
-    lesserX = min(coordinatesA[2], coordinatesB[2])
-    greaterY = max(coordinatesA[1], coordinatesB[1])
-    lesserY = min(coordinatesA[3], coordinatesB[3])
-   
-    # area of the rectangle of intersection
-    intersection = (lesserX - greaterX) * (lesserY - greaterY)
-    # print(f'Intersection is {intersection}')
+    xLeft = max(coordinatesA[0], coordinatesB[0])
+    xRight = min(coordinatesA[2], coordinatesB[2])
+    yTop = max(coordinatesA[1], coordinatesB[1])
+    yBottom = min(coordinatesA[3], coordinatesB[3])
 
-    # Area of both boxes and get union
-    areaA = (coordinatesA[2] - coordinatesA[0]) * (coordinatesA[3] - coordinatesA[1])
-    # print(f'Area of A is {areaA}')
-    areaB = (coordinatesB[2] - coordinatesB[0]) * (coordinatesB[3] - coordinatesB[1])
-    # print(f'Area of B is {areaB}')
-    union = float(areaA + areaB - intersection)
-    # print(f'Union is {union}')
+    # Can these be evaluated?
+    if xRight >= xLeft and yBottom >= yTop:
+        # area of the rectangle of intersection
+        intersection = (xRight - xLeft + 1) * (yBottom - yTop + 1)
+        print(f'Intersection is {intersection}')
 
-    iou = intersection/union
-    # print(f'IOU is {iou}')
+        # Area of both boxes and get union
+        areaA = (coordinatesA[2] - coordinatesA[0] + 1) * (coordinatesA[3] - coordinatesA[1] + 1)
+        # print(f'Area of A is {areaA}')
+        areaB = (coordinatesB[2] - coordinatesB[0] + 1) * (coordinatesB[3] - coordinatesB[1] + 1)
+        # print(f'Area of B is {areaB}')
+        union = float(areaA + areaB - intersection)
+        print(f'Union is {union}')
+
+        iou = intersection/union
+    else:
+        iou = 0.0
     return iou
 
-# reply = calculate_IOU(ra,rb)
-# print(reply)
+reply = calculate_IOU(ra,rb)
+print(f"IOU is {reply}")
 
 # this prints the ss results on the cow image to see that it works
 def visualiseSS(yourImage, boxesVariable):
